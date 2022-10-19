@@ -9,4 +9,4 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-I'm trying to make a merge conflict.
+I'm trying to make a merge conflict. Pizza pizza yum yum!
