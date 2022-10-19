@@ -1,0 +1,104 @@
+---
+title: "Using dplyr to fix mistakes"
+author: "Trent Meyer"
+date: "10/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+My goals for this homework are to get more practice with dplyr functions, and how they can be used to fix mistakes in our data.
+
+```{r}
+rm(list = ls())
+library(dplyr)
+library(here)
+library(ggplot2)
+```
+
+# Reading in the data
+
+## Import the data using read.csv but without stringsAsFactors = TRUE and name the data frame "DF"
+```{r}
+DF <- read.csv(here("Data", "drug_resistance.csv"))
+```
+
+## Run a summary of DF and see what it tells you.
+```{r}
+summary(DF)
+```
+ 
+This summary of DF tells us there are four variables: Treatment, Plate_n, colony.count, and tech.name. Treatment and tech.name are characters, while Plate_n and colony.count are numerical.
+
+## Now import the data again, still using read.csv but this time adding stringsAsFactors = TRUE. Again name the dataframe DF. It will write over the first data frame you imported. 
+
+```{r}
+## DF <- read.csv(here("Data", "drug_resistance.csv"), stringsAsFactors = TRUE)
+```
+
+## Run a summary of DF and see how it differs from the first time you ran it.
+```{r}
+summary(DF)
+```
+
+Now it does not say they are characters, rather it gives the factor levels and the number of times it shows up. The factor levels are case sensitive though, so becca and Becca are two different levels.
+
+## Make some notes in your .Rmd file about how the summary() command reacts to data that do vs. do not have explicit factor variables in the data set.
+
+If data do not have explicit factor variables in the data set, it will read them in as a Character, and you will not be able to do any analysis on them. However, if you read them in where they have factor variables, you are able to see in the summary the frequency of each factor level.
+
+## Now use either the function unique() or levels() to examine each of the text-based columns of data. In which variables do you see errors?
+```{r}
+levels(DF$Treatment)
+```
+
+We can see that for Treatment, there are issues with the cases, so "control" and "Control" are two different factors. Also, there is a typo on one where it says "cantrol" instead of "control". Then there are "drug x 2", "drug x 3" and "Drug x 3" which are all different from "drug2", "drug3", and "Drugx2". We may not have enough information to see which are the same and which are different levels.
+
+```{r}
+levels(DF$tech.name)
+```
+
+We can see that for tech.name there are also issues with cases. "becca" and "Becca", and also "brian", "Brian" and "brain" (which could be a typo).
+
+## Using the techniques we discussed in class, repair the data set so that there are the appropriate number of choices for each of the character/factor variables.
+
+### For the Treatment variable
+
+Find all the rows with control in the name. Learn to use which to return row numbers.
+```{r}
+controls <- which(DF$Treatment == "control" | DF$Treatment == "cantrol" | DF$Treatment == "Control")
+
+DF$Treatment[controls] <- "control"
+```
+
+Find all the rows with `drug x 2`, drug2, or Drugx2 in the name. 
+```{r}
+drugx2 <- which(DF$Treatment == "drug x 2" | DF$Treatment == "drug2" | DF$Treatment == "Drugx2")
+
+DF$Treatment[drugx2] <- "drugx2"
+```
+
+Find all the rows with `drug x 3`, Drug x 3, or drug3 in the name. 
+```{r}
+drugx3 <- which(DF$Treatment == "drug x 3" | DF$Treatment == "drug3" | DF$Treatment == "Drug x 3")
+
+DF$Treatment[drugx3] <- "drugx3"
+```
+
+### For the tech.name variable
+Find all the rows with Brian, brian, or brain
+```{r}
+brians <- which(DF$tech.name == "brian" | DF$tech.name == "Brian" | DF$tech.name == "brain")
+
+DF$tech.name[brians] <- "brian"
+```
+
+Find all the rows with Becca or becca
+```{r}
+beccas <- which(DF$tech.name == "becca" | DF$tech.name == "Becca")
+
+DF$tech.name[beccas] <- "becca"
+```

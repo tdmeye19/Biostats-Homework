@@ -1,0 +1,36 @@
+---
+title: "Meyer_Homework12"
+author: "Trent Meyer"
+date: "9/28/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This homework is practicing using dplyr functions and concepts from GSWR Chapters 2 and 3
+
+```{r}
+rm(list = ls()) # clear's the environment
+library(dplyr) # loads in the dplyr package
+library(here) # loads in the here package
+Cover <- read.csv(here("Data", "donnerville_percent_cover.csv"), stringsAsFactors = TRUE) # reads in the percent cover df and call it Cover with strings as factors
+```
+
+```{r}
+str(Cover) # look at the structure of Cover
+head(Cover) # look at the first six observations in Cover
+```
+
+```{r}
+Cover %>% filter(Site == "Donnerville 1") %>% group_by(Type) %>% summarise(avg_percent_cover = mean(Percent))
+```
+
+This is taking the Cover df, filter out for rows where Donnerville 1 is the site, grouping by the type of cover, and calculating the mean percent cover for the groups.
+
+```{r}
+Cover %>% filter(Type == "Vascular") %>% summarise(avg_percent_cover = mean(Percent))
+```
+
+This is taking the Cover df, filtering out for the Vascular type, and then determining the average percent vascular plant cover across all sites.

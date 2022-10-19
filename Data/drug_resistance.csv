@@ -1,0 +1,31 @@
+Treatment,Plate_n,colony count,tech name
+control,1,8,jose
+Control,2,12,Brian
+control,3,25,jose
+control,4,22,brian
+Control,5,31,jose
+cantrol,6,26,jose
+control,7,21,Brian
+control,8,12,Mary
+control,9,22,jose
+control,10,29,Mary
+drug x 2,11,5,Becca
+Drugx2,12,0,Becca
+drug x 2,13,7,jose
+drug x 2,14,2,becca
+drug2,15,0,brain
+drug2,16,0,Mary
+drug x 2,17,0,jose
+drug x 2,18,3,Becca
+drug x 2,19,4,becca
+drug x 2,20,1,Mary
+drug3,21,12,brian
+drug3,22,18,Brian
+drug x 3,23,15,brian
+drug x 3,24,21,jose
+drug x 3,25,19,Mary
+Drug x 3,26,22,Mary
+drug x 3,27,24,Becca
+drug x 3,28,18,jose
+drug x 3,29,18,Mary
+drug x 3,30,12,jose

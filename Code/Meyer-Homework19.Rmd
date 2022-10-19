@@ -1,0 +1,111 @@
+---
+title: "Untitled"
+author: "Trent Meyer"
+date: "10/16/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+Our goals for this homework are to get some more practice with fixing data sets, and using dplyr functions and others such as str().
+
+Add code to turn on the dplyr package and code to “clear R’s brain.”
+```{r}
+rm(list = ls()) # clears the environment
+library(dplyr) # loads in the dplyr package
+library(here) # loads in the here package
+```
+
+Import the data set and name it "Leaves"
+```{r}
+Leaves <- read.csv(here("Data", "Class_leaf_measurements.csv")) # read in the data starting from Meyer-Homework, and specifying the path in quotes
+```
+
+Using the here() function lets us start at a certain directory, which in this case was Meyer-Homework, and then we specified each directory or file after that in quote separated by commas.
+
+Examine the data set using the str() function. 
+```{r}
+str(Leaves) # lets us see the structure of the Leaves df, showing variable data types
+```
+
+str() gives us all of the variables, along with their data type, and the first few observations.
+
+Repair the column names so that there are no special characters or spaces.
+```{r}
+names(Leaves) <- c("tree_num", "species", "leaf_num", "DBH_cm", "petiole_length",
+                   "total_length_cm", "middle_lobe_length_cm", "middle_lobe_width_cm", "person")
+# this is going to overwrite the variable names in Leaves using the list that we want
+```
+
+I got rid of all of the special characters or spaces, and out of personal preference I made everything lowercase.
+
+Convert Species to a factor variable and determine the number of levels in the factor.
+
+```{r}
+Leaves <- Leaves %>% mutate(species = as.factor(species)) # mutating species as a factor rather than character
+```
+
+Given that we only collected data from 3 species, what is the problem?
+
+```{r}
+unique(Leaves$species) # show all of the unique versions of species
+```
+
+The problem is that there are different forms of the levels in terms of cases, and also with some typos. Factors are case sensitive, so when you convert them, it sees 9 levels instead of the 3 that we want.
+
+Repair species names so that you end up with only 3 levels for the Species variable, red maple, sugar maple, and Norway maple.
+
+This one is going to find all of the indices for the 3 levels of red maple using the which function, and then replace those with "red maple"
+
+```{r}
+redmaples <- which(Leaves$species == "red maple" | Leaves$species == "Red Maple" | Leaves$species == "Red maple") # find all of the indices for the 3 levels of red maple
+
+Leaves$species[redmaples] <- "red maple" # replace those indices with "red maple"
+```
+
+This one is going to find all of the indices for the 3 levels of sugar maple using the which function, and then replace those with "sugar maple"
+
+```{r}
+sugarmaples <- which(Leaves$species == "sugar maple" | Leaves$species == "Sugar Maple" | Leaves$species == "Sugar maple") # find all of the indices for the 3 levels of sugar maple
+
+Leaves$species[sugarmaples] <- "sugar maple" # replace those indices with "sugar maple"
+```
+
+This one is going to find all of the indices for the 3 levels of Norway maple using the which function, and then replace those with "Norway maple"
+
+```{r}
+norwaymaples <- which(Leaves$species == "Norway maple" | Leaves$species == "Norway mapel" | Leaves$species == "Norway Maple") # find all of the indices for the 3 levels of Norway maple
+
+Leaves$species[norwaymaples] <- "Norway maple" # replace those indices with "Norway maple"
+```
+
+Using the which function returns the indices of a given condition. This can be useful for fixing errors in data collection. It may be an issue with a larger data set, but for a smaller one it is easy to find errors with the unique() function.
+
+Now that you have repaired the data, create a new dataset called "Sugar" by selecting only the sugar maple data from the Leaves data set.
+```{r}
+Sugar <- Leaves %>% filter(species == "sugar maple") # filtering out the sugar maple observations
+```
+
+This is selecting on the sugar maple entries using filter and the specified condition.
+
+Subset the columns in Sugar using dplyr commands so that you leave out the Person, Leaf number and Tree number variables. Save the result as Sugar.
+```{r}
+Sugar <- Sugar %>% select(-c(person, leaf_num, tree_num)) # choosing the variables we do not want using select(-c())
+```
+
+I am using the select function to concatenate which variables I do NOT want, I could have done a list with the six other variables I wanted, but this way is easier.
+
+Create a histogram of petiole lengths using the Sugar data set. 
+```{r}
+hist(Sugar$petiole_length) # make a histogram for the petiole length variable
+```
+
+Here I had to use the help for the hist() function, I thought it was going to require more, but this is just a very basic histogram. I could have added more breaks, but left it with the default.
+
+# Conclusion:
+
+This assignment gave us more practice with using the names() function, by showing us how we can rename our variables to get rid of characters and spaces. Also, we got practice fixing factor levels if we had different versions of the same level. Using the unique function can help us to get rid of issues with cases or misspelling. Finally, we made a quick histogram for the petiole length using the hist() function.

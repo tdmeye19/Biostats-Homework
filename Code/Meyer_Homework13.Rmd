@@ -1,0 +1,51 @@
+---
+title: "Applying more dplyr to my data"
+author: "Trent Meyer"
+date: "9/29/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+My goals for this homework are to practice using dplyr functions on different data sets, and get used to how the functions work and when to use them.
+
+```{r}
+rm(list = ls()) # clears the environment
+library(dplyr) # loads in the dplyr package
+library(here) # loads in the here package
+# Import the data using read.csv and name the data frame "DF"
+DF <- read.csv(here("Data", "day_one_data_for_homework13.csv")) # read in the day one data csv
+```
+
+Use the View(DF) function call to open your dataset in a new tab
+```{r}
+View(DF) # open the DF in another tab
+```
+
+Scroll through the data. Notice what happened to the column names that have spaces and the column that had a # in the column name in the .csv.  How did R change them?
+
+For the ones that had spaces, there was a period put in place of the space. For the column that had a #, it was replaced with "..".
+
+Use the names() function (hint - chapter 2) to change the column names to, in order from left to right: Name, Date, Part, Tree_num, Species, leaf_length, leaf_width, leaf_units
+
+```{r}
+names(DF) <- c("Name", "Date", "Part", "Tree_num", "Species", "leaf_length", "leaf_width", 
+"leaf_units")
+```
+
+At first I had an issue where I made the DF null because I had DF <- names(c("Name", "Date"...)), however I just needed to create a vector and reassign that to names(DF).
+
+Notice that some of the leaf measurements are in inches, and some are in metric units. Write code that selects just the rows of data that are in English units (inches) and that saves them to a new data frame called "English"
+```{r}
+English <- DF %>% filter(leaf_units == "inches")
+```
+
+Now notice that the dates have been entered in several formats, and that for one person, the years associated with the dates are incorrect. Write code that collects all of the data for which the dates have been formatted in the same way together into a single data frame and call it "Uniform_dates"
+
+```{r}
+Uniform_dates <- DF %>% filter(Date == "8/24/22")
+```
+

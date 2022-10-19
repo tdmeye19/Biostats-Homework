@@ -1,0 +1,158 @@
+---
+title: "Meyer_HW11_GSWRCh3Ex1"
+author: "Trent Meyer"
+date: "9/25/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Introduction: Here I am working on Homework 11, which goes through Chapter 3 called "Data Management, Manipulation, and Exploration with `dplyr`" in the GSWR book.
+
+# Setting Things Up
+```{r}
+rm(list = ls()) # clears the environment
+library(ggplot2) # loads in the ggplot2 package
+library(dplyr) # loads in the dplyr package
+library(here) # loads in the here package
+compensation <- read.csv(here("Data", "compensation.csv")) # loads in the compensation data set
+```
+
+# 3.1 Summary Statistics for each variable
+```{r}
+glimpse(compensation) # checking to make sure we have the correct data
+summary(compensation) # get summary statistics for the compensation variables
+```
+
+The summary() function gives us a good idea if our data is extreme or doesn't make sense. A good thing to look at after reading your data into R.
+
+# 3.2 dplyr verbs
+`select()`, `slice()`, `filter()`, `arrange()`, and `mutate()` are five functions used to manipulate data from the dplyr package.
+
+`select()`: selecting columns 
+`slice()`: selecting rows
+`filter()`: getting a subset of rows given a specified condition
+`arrange()`: sorting rows
+`mutate()`: creating new variables
+
+First argument for all dplyr functions is the data frame!
+
+# 3.3 Subsetting
+
+`select()`
+```{r}
+select(compensation, Fruit) # returns the Fruit column in a data frame
+```
+
+select() asks for a data frame and then returns a data frame
+
+```{r}
+select(compensation, -Root) # returns everything except for Root in a data frame
+```
+
+`slice()` "works by returning specific row numbers you ask for"
+```{r}
+slice(compensation, 2) # returns the second row in compensation
+```
+
+returning sequences of rows
+```{r}
+slice(compensation, 2:10) # returns the second to the tenth rows
+```
+
+returning discontinuous sets of rows
+```{r}
+slice(compensation, c(2, 3, 10))
+```
+
+Also returns a data frame, however does not return the row number identity found in the original!!
+
+```{r}
+with(compensation, Fruit > 80) # produces a sequence of TRUE/FALSE saying where in Fruit the condition is met
+```
+
+`filter()`
+```{r}
+# find the rows where it is True that Fruit is >80 and return them as a df
+filter(compensation, Fruit > 80)
+```
+
+`==` equals
+`!=` does not equal
+`>` greater than
+`>=` greater than or equal to
+`<` less than
+`<=` less than or equal to 
+`|` or
+`&` and
+
+```{r}
+filter(compensation, Fruit > 80 | Fruit < 20) 
+# returns rows where Fruit is greater than 80 OR less than 20
+```
+
+```{r}
+lo_hi_fruit <- filter(compensation, Fruit > 80 | Fruit < 20)
+lo_hi_fruit
+```
+
+# 3.4 Transforming
+
+`mutate()`
+```{r}
+# what does compensation look like now
+head(compensation)
+
+# use mutate
+# log(Fruit) is in the column logFruit
+# all of which gets put into the object compensation
+compensation <- mutate(compensation, logFruit = log(Fruit))
+
+# first 6 rows of the new compensation
+head(compensation)
+```
+
+By renaming a new data frame the same name as what it was originally called, you can overwrite it
+
+# 3.5 Sorting
+
+`arrange()`
+```{r}
+arrange(compensation, Fruit) # if we want to see the compensation df in increasing Fruit production order
+```
+
+You can use more than one dplyr function in one line of code
+```{r}
+select(filter(compensation, Fruit > 80), Root) # filter by Fruit production and the Root widths only
+```
+
+Reading from the inside out will help
+
+# Piping
+
+Makes things make more sense rather than putting many functions inside of each other
+
+```{r}
+compensation %>% 
+  filter(Fruit > 80) %>% 
+  select(Root)
+```
+
+Nested approach
+```{r}
+mean.fruit <- summarise(
+  group_by(compensation, Grazing), # grouping by grazing
+  meanFruit = mean(Fruit)) # calculate the mean for each of the grazing groups
+```
+
+Pipe approach
+```{r}
+compensation %>% 
+  group_by(Grazing) %>%
+  summarise(meanFruit = mean(Fruit),
+            sdFruit = sd(Fruit))
+```
+
+Piping saves a lot of confusion, and lets you use the dplyr functions to easily manipulate data frames to do what you want!
