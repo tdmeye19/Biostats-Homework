@@ -1,0 +1,146 @@
+---
+title: "Homework-21.Rmd"
+author: "Trent Meyer"
+date: "10/21/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This homework is looking at GSWR Chapter 4: "Visualizing Your Data" and helps us look at how to make scatterplots, histograms, and box-and-whisker plots using dplyr and ggplot2.
+
+```{r}
+# plotting basics with ggplot
+
+# libraries I need
+library(dplyr) # loads in the dplyr package
+library(ggplot2) # loads in the ggplot2 package
+library(here) # loads in the here package
+
+rm(list = ls()) # clears the environment
+
+# read in the compensation data set
+compensation <- read.csv(here("Data", "compensation.csv"))
+
+# check out the data
+glimpse(compensation)
+```
+
+# Plain and Simple bivariate scatterplot using ggplot2
+```{r}
+ggplot(compensation, aes(x = Root, y = Fruit)) +
+  geom_point()
+```
+
+First we give the data set as the first argument, and then we specify the aesthetics.
+
+`+` symbol lets us add layers after the first layer, and we need to specify a geom, here we did geom_point() which added the points onto the first layer we made.
+
+# Scatterplots 
+
+## Getting rid of the grey background
+```{r}
+ggplot(compensation, aes(x = Root, y = Fruit)) +
+  geom_point() +
+  theme_bw() # here is what changed
+```
+
+## Increase the size of the points
+```{r}
+ggplot(compensation, aes(x = Root, y = Fruit)) +
+  geom_point(size = 5) + # here is what changed
+  theme_bw()
+```
+
+## Add axis labels
+```{r}
+ggplot(compensation, aes(x = Root, y = Fruit)) +
+  geom_point(size = 5) +
+  xlab("Root Biomass") + # here is what changed
+  ylab("Fruit Production") + # here is what changed
+  theme_bw()
+```
+
+## Adjust colours to match levels
+```{r}
+ggplot(compensation, aes(x = Root, y = Fruit, colour = Grazing)) + # here is what changed
+  geom_point(size = 5) +
+  xlab("Root Biomass") +
+  ylab("Fruit Production") +
+  theme_bw()
+```
+
+## Change the shape of points
+```{r}
+ggplot(compensation, aes(x = Root, y = Fruit, shape = Grazing)) + # here is what changed
+  geom_point(size = 5) +
+  xlab("Root Biomass") +
+  ylab("Fruit Production") +
+  theme_bw()
+```
+
+# Box-and-whisker plots
+
+Good for showing variation along with either the median or mean.
+
+```{r}
+ggplot(compensation, aes(x = Grazing, y = Fruit)) +
+  geom_boxplot() +
+  xlab("Grazing treatment") +
+  ylab("Fruit Production") +
+  theme_bw()
+```
+
+## Adding the raw data
+```{r}
+ggplot(compensation, aes(x = Grazing, y = Fruit)) +
+  geom_boxplot() +
+  geom_point(size = 4, colour = 'lightgray', alpha = 0.5) + # alpha blurs out the points
+  xlab("Grazing treatment") +
+  ylab("Fruit Production") +
+  theme_bw()
+```
+
+Plants with wider root diameters produce more fruit compared to smaller diameters. Grazed plants produce more fruit compared to ungrazed.
+
+# Histograms
+
+```{r}
+ggplot(compensation, aes(x = Fruit)) +
+  geom_histogram()
+```
+
+## Changing bin width
+```{r}
+ggplot(compensation, aes(x = Fruit)) +
+  geom_histogram(bins = 10)
+ggplot(compensation, aes(x = Fruit)) +
+  geom_histogram(binwidth = 15)
+```
+
+# Faceting
+
+Produces a matrix of graphs by a categorical variable in our data!
+
+```{r}
+ggplot(compensation, aes(x = Fruit)) +
+  geom_histogram(binwidth = 15) + 
+  facet_wrap(~Grazing)
+```
+
+# ggsave()
+
+Let's us save a plot as a .png
+
+```{r}
+ggsave("ThatCoolHistogramofFruit.png")
+```
+
+
+# Conclusion
+
+We learned how to make scatterplots, histograms, and box-and-whisker plots. We learned that the arguments are first data, and then we specify the aesthetics. We learned how to change axis labels, point shapes and sizes, colour of points, and how to add layers. We also learned about faceting, which is super helpful with categorical data.
