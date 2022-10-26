@@ -1,0 +1,75 @@
+---
+title: "Homework23.Rmd"
+author: "Trent Meyer"
+date: "2022-10-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This homework is giving us practice with data visualizations, and the beginning of data analysis. We are creating a scatterplot, histogram, and box-and-whisker plot for two variables.
+
+## Usual Code
+```{r}
+rm(list = ls()) # clears the environment
+library(ggplot2) # loads in the ggplot2 library
+library(here) # loads in the here library
+library(dplyr) # loads in the dplyr library
+```
+
+```{r}
+soil_df <- read.csv(here("Data", "soil_data.csv"))
+
+library(stringr)
+soil_df <- soil_df %>% mutate(field = word(Field.Name, 1))
+```
+
+## Scatterplot for SOM_percent
+```{r}
+ggplot(data = soil_df, aes(x = SOM_percent, y = field)) +
+  geom_point()
+```
+
+Here I was a little unsure with the Field.Name, if it would be better to separate() this variable into variables called: field, plot, and sample.
+
+I ended up using word() to get the field into a new variable, and just use that instead
+
+## Histogram for SOM_percent
+```{r}
+ggplot(data = soil_df, aes(x = SOM_percent)) +
+  geom_histogram()
+```
+
+## Box-and-Whisker Plot for SOM_percent
+```{r}
+ggplot(data = soil_df, aes(x = SOM_percent)) +
+  geom_boxplot()
+```
+
+## Scatterplot for Ca.ppm
+```{r}
+ggplot(data = soil_df, aes(x = Ca.ppm, y = field)) +
+  geom_point()
+```
+
+I ended up using word() to get the field into a new variable, and just use that instead
+
+## Histogram for Ca.ppm 
+```{r}
+ggplot(data = soil_df, aes(x = Ca.ppm)) +
+  geom_histogram()
+```
+
+## Box-and-Whisker Plot for Ca.ppm
+```{r}
+ggplot(data = soil_df, aes(x = Ca.ppm)) +
+  geom_boxplot()
+```
+
+# Conclusion
+
+I learned that it is possible to create a different plot compared to another person, and have both methods be correct. For the Field.Name, I chose to use word(), while someone else could have used separate, or they could have faceted.
