@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
+Erika added this line to make a demo pull request
 I'm trying to make a merge conflict. Gus is super cool!
 
 I'm trying to make a merge conflict. Pizza pizza yum yum!
