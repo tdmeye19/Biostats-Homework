@@ -1,0 +1,108 @@
+---
+title: "Homework 24"
+author: "Trent Meyer"
+date: "2022-10-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This homework has us reading and working through the first half of Chapter 5 of the Getting Started with R book. We are working through to section 5.3.4, which looks at t-tests.
+
+It said in the book to always start with visualizations, so you can have an expectation of what you want to see, and then you can do the statistical test.
+1. plot your data 
+2. build your model
+3. check your assumptions
+4. interpret your model
+5. replot the data and the model
+
+# 5.2 Chi-Squared Contingency Table Analysis
+
+Looks at count data, and "is essentially a test of association among two or more categorical variables."
+
+```{r}
+# My First Chi-Square contingency analysis
+
+# clear the environment
+rm(list = ls()) 
+
+# libraries I will use 
+library(dplyr)
+library(ggplot2)
+library(here)
+
+# import the data 
+lady <- read.csv(here("Data", "ladybirds.csv"))
+
+# check it out
+glimpse(lady)
+```
+
+We want to create a table of the totals for each colour and location.
+```{r}
+totals <- lady %>%
+  group_by(Habitat, colour) %>%
+  summarise(total.number = sum(number))
+```
+
+```{r}
+ggplot(totals, aes(x = Habitat, y = total.number,
+                   fill = colour)) +
+  geom_bar(stat = 'identity', position = 'dodge') +
+  scale_fill_manual(values = c(black = "black", red = "red"))
+```
+
+fill changes the fill color of the bar, while colour changes the outline
+
+stat = 'identity' tells ggplot to use just the data we are giving it. position = 'dodge' puts the two bars next to each other
+
+```{r}
+lady.mat <- xtabs(number ~ Habitat + colour,
+                  data = lady)
+lady.mat # let's us cross tabulate the data in a matrix
+```
+
+
+```{r}
+lady.chi <- chisq.test(lady.mat)
+lady.chi$expected
+```
+
+Very small p-value, (the probability we see is consistent with the null hypothesis), meaning that there is no association between the variables, and we choose to reject the null.
+
+# 5.3.4 Two-sample t-test
+
+Comparison of the means fo two groups of numeric values. It is appropriate for small sample sizes. Assumptions of constant variance and normality.
+
+```{r}
+ozone <- read.csv(here("Data", "ozone.csv"))
+glimpse(ozone)
+```
+
+Plot the data to see expected relationship
+```{r}
+ggplot(ozone, aes(x = Ozone)) +
+  geom_histogram(binwidth = 10) +
+  facet_wrap(~ Garden.location, ncol = 1) +
+  theme_bw()
+```
+
+We can see that the peaks are at different locations on the x-axis.
+
+```{r}
+t.test(Ozone ~ Garden.location, data = ozone)
+```
+
+We can see in the output that we are given a 95% CI, and it gives us the Ha. The p-value is small so we can reject the null hypothesis.
+
+```{r}
+var.test(Ozone ~ Garden.location, data = ozone)
+```
+
+# Conclusion
+
+We learned how to use perform a chisquare and t-test. I think I will just need to get used to this whole process again, as it has been a while since I did this last.
