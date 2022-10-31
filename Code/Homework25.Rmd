@@ -1,0 +1,134 @@
+---
+title: "Homework25"
+author: "Trent Meyer"
+date: "2022-10-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This homework assignment is using the second half of chapter 5 in Getting Started with R, starting from Section 5.4. We will be getting introduced to the idea of Simple Linear Regression and ANOVA tests.
+
+```{r}
+rm(list = ls()) # clear the environment
+library(dplyr) # load in the dplyr library
+library(ggplot2) # load in the ggplot2 library
+library(here) # load in the here library
+```
+
+## Read in the data
+
+```{r}
+plant_gr <- read.csv(here("Data", "datasets-master", "plant.growth.rate.csv"))
+glimpse(plant_gr)
+```
+
+We see two continuous variables, not we want to take a look and then use simple linear regression!
+
+# 5.5 Simple linear regression
+
+```{r}
+ggplot(data = plant_gr, aes(x = soil.moisture.content, y = plant.growth.rate)) +
+  geom_point() +
+  ylab("Plant Growth Rate (mm/week)") +
+  theme_bw()
+```
+
+We can make a few assumptions, looking at the correlation, and then guessing the slope and intercept that we are possibly going to get.
+
+```{r}
+model_pgr <- lm(plant.growth.rate ~ soil.moisture.content,
+                data = plant_gr)
+```
+
+We hypothesize that plant growth rate is a function of soil moisture content, y ~ x.
+
+```{r}
+library(ggfortify)
+autoplot(model_pgr, smooth.colour = NA)
+```
+
+Residuals vs Fitted: look to see if a linear model was the best choice
+Normal Q-Q: test the normality assumption
+Scale-Location: way to look at constant variance
+Residuals vs Leverage: look for points with high leverage (influence on the model)
+
+```{r}
+anova(model_pgr)
+```
+
+F-value of 156.08, leading to tiny p-value. 
+
+```{r}
+summary(model_pgr)
+```
+
+We get estimates for the coefficients. I have seen these tables a lot, in STAT 113, 213, and 313. 
+
+Next we want to translate our model back onto the raw data to see if it fits.
+
+```{r}
+ggplot(data = plant_gr, aes(x = soil.moisture.content,
+                            y = plant.growth.rate)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  ylab("Plant Growth Rate (mm/week)") +
+  theme_bw()
+```
+
+geom_smooth(method = "lm") fits a model, and can also be used with facet_wrap().
+
+# 5.6 ANOVA
+
+One of the variables is categorical, instead of numerical.
+
+```{r}
+daphnia <- read.csv(here("Data", "datasets-master", "Daphniagrowth.csv"))
+glimpse(daphnia)
+```
+
+```{r}
+ggplot(data = daphnia, aes(x = parasite, y = growth.rate)) +
+  geom_boxplot() +
+  theme_bw() +
+  coord_flip() # add this to avoid the axis labels becoming messy 
+```
+
+```{r}
+model_grow <- lm(growth.rate ~ parasite, data = daphnia)
+```
+
+parasite is the explanatory variable, and it is categorical.
+
+```{r}
+autoplot(model_grow, smooth.colour = NA)
+```
+
+When looking at the Q-Q plot, it does not seem as obvious that we could make the normality assumption. However, the others look adequate.
+
+```{r}
+anova(model_grow)
+```
+
+Still a very small p-value! This would indicate that the parasite treatment has produced an effect on growth.rate.
+
+```{r}
+summary(model_grow)
+```
+
+We need to remember that the levels are alphabetized, and then they are all compared to the one reference level, in this case "control". The intercept is related to control.
+
+```{r}
+sumDat <- daphnia %>% group_by(parasite) %>%
+  summarise(meanGR = mean(growth.rate))
+```
+
+# Conclusion:
+1. Always do exploratory data analysis.
+2. Get an idea of slopes, intercepts, correlation first!
+3. Check for assumptions using autoplot()
+4. Fit your model and then plot it against the raw data.
