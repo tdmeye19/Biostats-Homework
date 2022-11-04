@@ -1,0 +1,195 @@
+---
+title: "Homework26"
+author: "Trent Meyer"
+date: "11/4/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list = ls())
+library(tidyverse)
+library(here)
+library(ggfortify)
+```
+
+```{r}
+soil <- read.csv(here("Data", "soil_reduced-1.csv"), stringsAsFactors = TRUE)
+```
+
+Before we begin any analysis, we need to check out data for possible errors/outliers. Let's begin with that.
+
+A. Forest names
+```{r}
+levels(soil$Forest)
+```
+
+B. Let's check soil organic matter and soil calcium.
+
+Start with histogram for SOM
+```{r}
+ggplot(data = soil, aes(x = SOM_percent)) +
+  geom_histogram()
+```
+
+Now check soil calcium
+```{r}
+ggplot(data = soil, aes(x = Ca_ppm)) +
+  geom_histogram()
+```
+
+Let's run a summary on all of the variables.
+
+```{r}
+summary(soil)
+```
+
+
+## 1. Is there a relationship between Soil organic matter (SOM, %) and soil calcium (Ca_ppm)? (Linear Regression)
+
+Both variables are continuous
+
+```{r}
+ggplot(data = soil, aes(x = SOM_percent, y = Ca_ppm, colour = Forest)) +
+  geom_point()
+```
+
+From looking at the data, it appears there may be a weak positive relationship between SOM and Ca_ppm.
+
+Can I guess the slope or y-intercept?
+Slope 1000/53 = 18ish
+y-int around 0, possibly negative
+
+What statistical model fits these data?
+Both response and predictor are continuous, so linear regression seems appropriate.
+
+Ho: There is no relationship between SOM and Ca_ppm
+Ha: There is a relationship between SOM and Ca_ppm
+
+```{r}
+som_ca_mod <- lm(Ca_ppm ~ SOM_percent, data = soil)
+autoplot(som_ca_mod)
+```
+
+Based on my observations of the autoplot results, I am modestly comfortable that my data meet the lm() assumptions.
+
+Now look at model outcome
+```{r}
+anova(som_ca_mod)
+summary(som_ca_mod)
+```
+
+
+## 2. Does the abundance of worms differ between Donnerville and the Kip Tract? (Chi-square)
+
+Worms is quantitative (discrete) and Donnerville/Kip Tract is categorical (binary).
+
+Now I want to filter out the Donnerville and Kip Tract observations.
+```{r}
+soil_2 <- soil %>% filter(Forest == "DONNERVILLE" | Forest == "KIP TRACT")
+```
+
+There are nine observations for both Donnerville and Kip Tract.
+
+```{r}
+ggplot(data = soil_2, aes(x = Forest, y = Worms)) +
+  geom_boxplot()
+
+ggplot(data = soil_2, aes(x = Worms)) +
+  geom_histogram(bins = 4) +
+  facet_wrap(~Forest)
+```
+
+It looks to me like there is not a lot of overlap, and the means are different (2 for Donnerville and 4 for Kip Tract) when looking at the boxplot. For the faceted histograms, we can see that the Donnerville is left skewed, while the kip tract is more right skewed.
+
+What statistical model fits these data?
+
+We would want to use a chi-square test.
+
+Ho: difference in mean worm abundance between Donnerville and Kip Tract = 0
+Ha: difference in mean worm abundance between Donnerville and Kip Tract != 0
+
+We need to create the two-way table for the chi-square test.
+```{r}
+total_2 <- soil_2 %>% group_by(Forest) %>% summarise(total_worms = sum(Worms))
+soil_2$Forest <- factor(soil_2$Forest)
+```
+
+Now we need to run the chi-square test.
+```{r}
+worm_mat <- xtabs(total_worms ~ Forest, data = total_2)
+
+worm_chi_sq <- chisq.test(worm_mat)
+```
+
+We can see that the p-value is very small, smaller than 0.05, meaning that we can reject the null hypothesis, and conclude that there is a difference in the abundance of worms between Donnerville and the Kip Tract.
+
+## 3. Does the abundance of soil Magnesium (Mg_ppm) differ between Peavine and South Hammond?
+
+Mg_ppm is continuous, while Peavine and South Hammond are part of Forest, which is categorical.
+
+Now we want to see the relationship, which we can see with faceted histograms.
+
+```{r}
+soil_3 <- soil %>% filter(Forest == "PEAVINE" | Forest == "SOUTH HAMMOND")
+ggplot(data = soil_3, aes(x = Mg_ppm)) +
+  geom_histogram(bins = 7) +
+  facet_wrap(~Forest)
+```
+
+We can see that the peaks are at slightly different places, with South Hammond seeming to be above 50, while Peavine is below 50.
+
+What statistical model fits these data?
+
+We would want to use a two-sample t-test.
+
+Ho: Difference in Abundance of Mg_ppm between Peavine and South Hammond = 0
+Ha: Difference in Abundance of Mg_ppm between Peavine and South Hammond != 0
+
+```{r}
+t.test(Mg_ppm ~ Forest, data = soil_3)
+```
+
+We see that there is a high p-value of 0.2222, meaning we choose not to reject the null hypothesis, which would mean the abundance of Mg_ppm does not differ between Peavine and South Hammond.
+
+## 4. Does the abundance of zinc (Zn_ppm) differ among forests?
+
+Abundance of zinc is continuous, while forest is categorical with 5 levels.
+
+Let's plot the relationship
+```{r}
+ggplot(data = soil, aes(x = Forest, y = Zn_ppm)) +
+  geom_boxplot()
+ggplot(data = soil, aes(x = Zn_ppm)) +
+  geom_histogram(bins =5) +
+  facet_wrap(~Forest)
+```
+
+We can see that Donnerville seems to be higher than the rest, while Degrasse is very low, with very little spread. Also each hisogram seems to have their peak at different places on the x-axis.
+
+Ho: Zn_ppm does not differ among forests
+Ha: Zn_ppm does differ among forests
+
+```{r}
+model_4 <- lm(Zn_ppm ~ Forest, data =  soil)
+```
+
+Now we check the assumptions
+```{r}
+autoplot(model_4)
+```
+
+All of the assumptions are sufficient, with only constant variance looking a little "iffy"
+
+```{r}
+anova(model_4)
+```
+
+There is a small F-value, and large p-value, which means that we choose to accept the null, and say that there is not a difference in Zinc abundance among forests.
+
+# Conclusion:
+
+It is important to look at the data types and determine which test to use. These questions can be tricky sometimes, but I think it is better to get more practice like this. Also, it is a good idea to practice interpretations more often, as I know what they are in STAT's classes, but I do not know what we are saying s amall p-value is here.
